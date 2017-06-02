@@ -74,10 +74,7 @@ namespace FeedsAcq
 
                 foreach (var host in hostLookup)
                 {
-                    foreach (var ftpspec in host)
-                    {
-                        DoFtpTransfer(ftpspec);
-                    }
+                    DoFtpTransfer(hostLookup[host.Key].ToList());
                 }
 
                 Console.WriteLine("");

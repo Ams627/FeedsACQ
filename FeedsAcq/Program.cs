@@ -10,6 +10,34 @@ using System.Xml.Linq;
 
 namespace FeedsAcq
 {
+    class FtpFilespec
+    {
+        /// <summary>
+        /// Abritrary name - not used
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Regular expression to match files on the SERVER:
+        /// </summary>
+        public string Match { get; set; }
+
+        /// <summary>
+        /// Directory on the server into which to change on connection:
+        /// </summary>
+        public string Dir { get; set; }
+
+        /// <summary>
+        /// Destination directory into which downloaded files are placed:
+        /// </summary>
+        public string DestDir { get; set; }
+
+        /// <summary>
+        /// Ignore files older than this number of days:
+        /// </summary>
+        public int IgnoreOlderDays { get; set; }
+    }
+
     class FtpSpec
     {
         public string Name { get; set; }
@@ -19,6 +47,8 @@ namespace FeedsAcq
         public string Password { get; set; }
         public string Match { get; set; }
         public string DestDir { get; set; }
+
+        public List<FtpFilespec> Filespecs { get; set; }
     }
     internal class Program
     {
@@ -62,11 +92,16 @@ namespace FeedsAcq
                 {
                     Name = (string)ftp.Attribute("Name"),
                     Host = (string)ftp.Attribute("Host"),
-                    Dir = (string)ftp.Attribute("Dir"),
                     Username = (string)ftp.Attribute("Username"),
                     Password = (string)ftp.Attribute("Password"),
-                    Match = (string)ftp.Attribute("Match"),
-                    DestDir = (string)ftp.Attribute("DestDir")
+                    Filespecs = ftp.Elements("Files").Select(filespec => new FtpFilespec
+                    {
+                        Name = (string)filespec.Attribute("Name"),
+                        Match = (string)filespec.Attribute("Match"),
+                        Dir = (string)filespec.Attribute("Dir"),
+                        DestDir = (string)filespec.Attribute("DestDir"),
+                        IgnoreOlderDays = Convert.ToInt32((string)filespec.Attribute("IgnoreOlderDays"))
+                    }).ToList()
                 }).ToList();
 
                 var hostLookup = ftplist.ToLookup(x => x.Host + x.Username + x.Password);
